@@ -40,6 +40,21 @@
             letter-spacing: -0.02em;
             margin-bottom: 0.4rem;
         }
+            .duration-date-input {
+                border-radius: 0.75rem;
+                border: 1px solid var(--line);
+                font-weight: 500;
+                color: var(--ink);
+                background: #fff url('data:image/svg+xml;utf8,<svg fill="#67708a" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M7 10h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z"/></svg>') no-repeat right 0.75rem center/1.1em auto;
+            }
+            .duration-date-input:disabled {
+                background-color: #f4f8ff;
+                color: #b0b8c9;
+            }
+            #apply-custom-date:disabled {
+                opacity: 0.6;
+                pointer-events: none;
+            }
 
         .subtitle {
             color: var(--muted);
@@ -88,9 +103,20 @@
         .stat-fashion .stat-value { color: var(--rose); }
 
         .toolbar {
-            display: grid;
-            grid-template-columns: 180px 1fr auto auto;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 0.75rem;
+        }
+
+        #duration-filter {
+            width: 170px;
+        }
+
+        #search-input {
+            width: 250px;
+            max-width: 250px;
         }
 
         .toolbar .form-select,
@@ -122,6 +148,21 @@
             color: #fff;
             background: linear-gradient(135deg, var(--primary), var(--teal));
             box-shadow: 0 0.65rem 1.2rem rgba(31, 111, 235, 0.24);
+        }
+
+        .filter-menu {
+            width: min(320px, 92vw);
+            border-radius: 0.85rem;
+            border: 1px solid var(--line);
+            box-shadow: 0 0.75rem 2rem rgba(20, 33, 58, 0.15);
+            padding: 0.85rem;
+        }
+
+        .price-value {
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 72px;
+            text-align: right;
         }
 
         .table-wrap {
@@ -201,7 +242,17 @@
             }
 
             .toolbar {
-                grid-template-columns: 1fr;
+                justify-content: stretch;
+            }
+
+            #duration-filter,
+            #search-input,
+            .toolbar > .dropdown,
+            #clear-filters-btn,
+            #export-btn,
+            .toolbar > a.btn {
+                width: 100%;
+                max-width: 100%;
             }
         }
     </style>
@@ -245,14 +296,89 @@
                 </div>
 
                 <div class="toolbar mb-3">
-                    <select id="duration-filter" class="form-select" aria-label="Duration filter">
-                        <option value="all">All Time</option>
-                        <option value="7">Last 7 Days</option>
-                        <option value="30">Last 30 Days</option>
-                        <option value="90">Last 90 Days</option>
-                    </select>
+<div class="dropdown">
+    <button class="btn btn-soft dropdown-toggle fw-semibold"
+            type="button"
+            id="durationDropdownBtn"
+            data-bs-toggle="dropdown">
+        <span id="duration-label">All Time</span>
+    </button>
 
-                    <input id="search-input" type="search" class="form-control" placeholder="Search by id, name, category, payment or datetime">
+    <div class="dropdown-menu p-2" style="min-width:260px;">
+
+        <!-- Options -->
+        <a class="dropdown-item duration-option" data-value="all" href="#">All Time</a>
+        <a class="dropdown-item duration-option" data-value="today" href="#">Today</a>
+        <a class="dropdown-item duration-option" data-value="7" href="#">Last 7 Days</a>
+        <a class="dropdown-item duration-option" data-value="30" href="#">Last 30 Days</a>
+        <a class="dropdown-item duration-option" data-value="90" href="#">Last 90 Days</a>
+        <a class="dropdown-item duration-option" data-value="365" href="#">Last 1 Year</a>
+        <a class="dropdown-item duration-option" data-value="thisyear" href="#">This Year</a>
+
+        <div class="dropdown-divider"></div>
+
+        <!-- Custom Range (HIDDEN INITIALLY) -->
+        <div id="custom-range-box" class="px-2 py-2 d-none">
+            <label class="small text-muted">Custom Range</label>
+
+            <input type="date" id="custom-date-from"
+                   class="form-control form-control-sm mt-1 mb-1">
+
+            <input type="date" id="custom-date-to"
+                   class="form-control form-control-sm mb-2">
+
+            <button id="apply-custom-date"
+                    class="btn btn-sm btn-primary w-100">
+                Apply
+            </button>
+        </div>
+
+        <!-- Custom trigger -->
+        <a class="dropdown-item duration-option" data-value="custom" href="#">
+            Custom Range
+        </a>
+
+    </div>
+</div>
+
+                    <input id="search-input" type="search" class="form-control" placeholder="Search products..." aria-label="Search products">
+
+                    <div class="dropdown">
+                        <button class="btn btn-soft" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open filters">
+                            <i class="bi bi-funnel-fill me-1"></i> Filter
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end filter-menu">
+                            <div class="mb-2">
+                                <label for="filter-category" class="form-label fw-semibold mb-1">Category</label>
+                                <select id="filter-category" class="form-select form-select-sm">
+                                    <option value="all">All Categories</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="filter-payment" class="form-label fw-semibold mb-1">Payment method</label>
+                                <select id="filter-payment" class="form-select form-select-sm">
+                                    <option value="all">All Payment Methods</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="filter-price" class="form-label fw-semibold mb-0">Max price</label>
+                                    <span id="filter-price-value" class="price-value">Any</span>
+                                </div>
+                                <input id="filter-price" type="range" class="form-range" min="0" max="0" step="1" value="0">
+                            </div>
+
+                            <div class="d-grid mt-2">
+                                <button id="clear-filters-menu-btn" type="button" class="btn btn-sm btn-outline-secondary">Clear filters</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="clear-filters-btn" type="button" class="btn btn-soft d-none">
+                        <i class="bi bi-x-circle me-1"></i> Clear
+                    </button>
 
                     <button id="export-btn" type="button" class="btn btn-soft">
                         <i class="bi bi-download me-1"></i> Export
@@ -335,8 +461,22 @@
     const bodyEl = document.getElementById('products-body');
     const totalEl = document.getElementById('grand-total');
     const alertArea = document.getElementById('alert-area');
-    const durationFilterEl = document.getElementById('duration-filter');
+    const durationLabel = document.getElementById('duration-label');
+    // Get date pickers and button from inside the dropdown each time (in case dropdown is re-rendered)
+    function getCustomRangeElements() {
+        return {
+            customDateFrom: document.getElementById('custom-date-from'),
+            customDateTo: document.getElementById('custom-date-to'),
+            applyCustomDateBtn: document.getElementById('apply-custom-date'),
+        };
+    }
     const searchInputEl = document.getElementById('search-input');
+    const filterCategoryEl = document.getElementById('filter-category');
+    const filterPaymentEl = document.getElementById('filter-payment');
+    const filterPriceEl = document.getElementById('filter-price');
+    const filterPriceValueEl = document.getElementById('filter-price-value');
+    const clearFiltersMenuBtn = document.getElementById('clear-filters-menu-btn');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
     const exportBtn = document.getElementById('export-btn');
 
     const totalProductsEl = document.getElementById('stat-total-products');
@@ -366,8 +506,14 @@
     const state = {
         products: [],
         filteredProducts: [],
-        duration: 'all',
+        duration: 'all', // 'all', 'today', 7, 30, 90, 365, 'thisyear', 'custom'
+        customFrom: '',
+        customTo: '',
         search: '',
+        categoryFilter: 'all',
+        paymentFilter: 'all',
+        maxPrice: 0,
+        maxPriceCeiling: 0,
         sortKey: 'datetime_submitted',
         sortDirection: 'desc'
     };
@@ -397,6 +543,97 @@
     function shortId(value) {
         const input = String(value || '');
         return input.length > 8 ? input.slice(0, 8) : input;
+    }
+
+    function populateFilterOptions() {
+        categories.forEach((category) => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            filterCategoryEl.appendChild(option);
+        });
+
+        paymentMethods.forEach((method) => {
+            const option = document.createElement('option');
+            option.value = method;
+            option.textContent = method;
+            filterPaymentEl.appendChild(option);
+        });
+    }
+
+    function hasActiveFilters() {
+        const categoryActive = state.categoryFilter !== 'all';
+        const paymentActive = state.paymentFilter !== 'all';
+        const priceActive = state.maxPriceCeiling > 0 && Number(state.maxPrice) < Number(state.maxPriceCeiling);
+        const durationActive = state.duration && state.duration !== 'all';
+        return categoryActive || paymentActive || priceActive || durationActive;
+    }
+
+    function updateClearButtonVisibility() {
+        clearFiltersBtn.classList.toggle('d-none', !hasActiveFilters());
+    }
+
+    function updatePriceFilterLabel() {
+        if (state.maxPriceCeiling <= 0 || Number(state.maxPrice) >= Number(state.maxPriceCeiling)) {
+            filterPriceValueEl.textContent = 'Any';
+            return;
+        }
+
+        filterPriceValueEl.textContent = `<= ${money(state.maxPrice)}`;
+    }
+
+    function clearFilters() {
+        // Reset category and payment
+        state.categoryFilter = 'all';
+        state.paymentFilter = 'all';
+        filterCategoryEl.value = 'all';
+        filterPaymentEl.value = 'all';
+
+        // Reset price
+        if (state.maxPriceCeiling > 0) {
+            state.maxPrice = state.maxPriceCeiling;
+            filterPriceEl.value = String(state.maxPriceCeiling);
+        } else {
+            state.maxPrice = 0;
+            filterPriceEl.value = '0';
+        }
+        updatePriceFilterLabel();
+
+        // Reset duration
+        state.duration = 'all';
+        state.customFrom = '';
+        state.customTo = '';
+        durationLabel.textContent = 'All Time';
+        const customBox = document.getElementById('custom-range-box');
+        if (customBox) customBox.classList.add('d-none');
+        const { customDateFrom, customDateTo } = getCustomRangeElements();
+        if (customDateFrom) customDateFrom.value = '';
+        if (customDateTo) customDateTo.value = '';
+
+        applyFiltersAndRender();
+    }
+
+    function updatePriceSliderMeta(products) {
+        const maxPrice = products.reduce((max, item) => Math.max(max, Number(item.price_per_item || 0)), 0);
+        state.maxPriceCeiling = Math.max(0, Math.ceil(maxPrice));
+
+        filterPriceEl.max = String(state.maxPriceCeiling);
+
+        if (state.maxPriceCeiling === 0) {
+            state.maxPrice = 0;
+            filterPriceEl.value = '0';
+            filterPriceValueEl.textContent = 'Any';
+            updateClearButtonVisibility();
+            return;
+        }
+
+        if (!state.maxPrice || state.maxPrice > state.maxPriceCeiling) {
+            state.maxPrice = state.maxPriceCeiling;
+        }
+
+        filterPriceEl.value = String(state.maxPrice);
+        updatePriceFilterLabel();
+        updateClearButtonVisibility();
     }
 
     function showAlert(message, type = 'success') {
@@ -446,17 +683,43 @@
 
     function filterProducts() {
         const searchTerm = state.search.trim().toLowerCase();
-        const days = Number(state.duration);
+        let rows = [...state.products];
         const now = new Date();
 
-        let rows = [...state.products];
-
-        if (!Number.isNaN(days) && days > 0) {
+        if (state.duration === 'today') {
+            const today = now.toISOString().slice(0, 10);
+            rows = rows.filter((item) => {
+                const date = parseDate(item.datetime_submitted);
+                return date && date.toISOString().slice(0, 10) === today;
+            });
+        } else if (['7','30','90'].includes(String(state.duration))) {
+            const days = Number(state.duration);
             const threshold = new Date(now);
             threshold.setDate(now.getDate() - days);
             rows = rows.filter((item) => {
                 const date = parseDate(item.datetime_submitted);
                 return date && date >= threshold;
+            });
+        } else if (state.duration === '365') {
+            // Previous calendar year only
+            const prevYear = now.getFullYear() - 1;
+            rows = rows.filter((item) => {
+                const date = parseDate(item.datetime_submitted);
+                return date && date.getFullYear() === prevYear;
+            });
+        } else if (state.duration === 'thisyear') {
+            const year = now.getFullYear();
+            rows = rows.filter((item) => {
+                const date = parseDate(item.datetime_submitted);
+                return date && date.getFullYear() === year;
+            });
+        } else if (state.duration === 'custom' && state.customFrom && state.customTo) {
+            const from = new Date(state.customFrom);
+            const to = new Date(state.customTo);
+            to.setHours(23,59,59,999);
+            rows = rows.filter((item) => {
+                const date = parseDate(item.datetime_submitted);
+                return date && date >= from && date <= to;
             });
         }
 
@@ -477,6 +740,18 @@
 
                 return haystack.includes(searchTerm);
             });
+        }
+
+        if (state.categoryFilter !== 'all') {
+            rows = rows.filter((item) => String(item.category || '').toLowerCase() === state.categoryFilter.toLowerCase());
+        }
+
+        if (state.paymentFilter !== 'all') {
+            rows = rows.filter((item) => String(item.payment_method || '').toLowerCase() === state.paymentFilter.toLowerCase());
+        }
+
+        if (state.maxPriceCeiling > 0) {
+            rows = rows.filter((item) => Number(item.price_per_item || 0) <= Number(state.maxPrice));
         }
 
         rows.sort(compareProducts);
@@ -564,6 +839,7 @@
         state.filteredProducts = filterProducts();
         updateSummaryCards(state.filteredProducts);
         renderTable(state.filteredProducts);
+        updateClearButtonVisibility();
     }
 
     function openDetailsModal(id) {
@@ -603,6 +879,7 @@
 
         const payload = await response.json();
         state.products = payload.products || [];
+        updatePriceSliderMeta(state.products);
         applyFiltersAndRender();
     }
 
@@ -682,14 +959,77 @@
         URL.revokeObjectURL(url);
     }
 
-    durationFilterEl.addEventListener('change', () => {
-        state.duration = durationFilterEl.value;
-        applyFiltersAndRender();
+
+    // Duration dropdown logic
+    document.querySelectorAll('.duration-option').forEach((el) => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            const val = el.getAttribute('data-value');
+            state.duration = val;
+            if (val === 'today') durationLabel.textContent = 'Today';
+            else if (val === '7') durationLabel.textContent = 'Last 7 Days';
+            else if (val === '30') durationLabel.textContent = 'Last 30 Days';
+            else if (val === '90') durationLabel.textContent = 'Last 90 Days';
+            else if (val === '365') durationLabel.textContent = 'Last 1 Year';
+            else if (val === 'thisyear') durationLabel.textContent = 'This Year';
+            else if (val === 'custom') durationLabel.textContent = 'Custom';
+            else durationLabel.textContent = 'All Time';
+
+            const customBox = document.getElementById('custom-range-box');
+            const { customDateFrom, customDateTo, applyCustomDateBtn } = getCustomRangeElements();
+            if (val === 'custom') {
+                customBox.classList.remove('d-none');
+            } else {
+                customBox.classList.add('d-none');
+                state.customFrom = '';
+                state.customTo = '';
+                if (customDateFrom) customDateFrom.value = '';
+                if (customDateTo) customDateTo.value = '';
+                applyFiltersAndRender();
+            }
+        });
+    });
+
+    // Delegate Apply button event to the dropdown's custom range box
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'apply-custom-date') {
+            e.preventDefault();
+            const { customDateFrom, customDateTo } = getCustomRangeElements();
+            state.customFrom = customDateFrom.value;
+            state.customTo = customDateTo.value;
+            if (state.customFrom && state.customTo) {
+                applyFiltersAndRender();
+            }
+        }
     });
 
     searchInputEl.addEventListener('input', () => {
         state.search = searchInputEl.value;
         applyFiltersAndRender();
+    });
+
+    filterCategoryEl.addEventListener('change', () => {
+        state.categoryFilter = filterCategoryEl.value;
+        applyFiltersAndRender();
+    });
+
+    filterPaymentEl.addEventListener('change', () => {
+        state.paymentFilter = filterPaymentEl.value;
+        applyFiltersAndRender();
+    });
+
+    filterPriceEl.addEventListener('input', () => {
+        state.maxPrice = Number(filterPriceEl.value);
+        updatePriceFilterLabel();
+        applyFiltersAndRender();
+    });
+
+    clearFiltersMenuBtn.addEventListener('click', () => {
+        clearFilters();
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+        clearFilters();
     });
 
     exportBtn.addEventListener('click', exportCsv);
@@ -755,6 +1095,7 @@
         }
     });
 
+    populateFilterOptions();
     fetchProducts().catch((error) => showAlert(error.message, 'danger'));
 </script>
 </body>
