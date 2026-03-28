@@ -11,7 +11,18 @@ class ProductController extends Controller
 {
     public function index()
     {
-        return view('products.index');
+        return view('products.index', [
+            'categories' => $this->categories(),
+            'paymentMethods' => $this->paymentMethods(),
+        ]);
+    }
+
+    public function create()
+    {
+        return view('products.create', [
+            'categories' => $this->categories(),
+            'paymentMethods' => $this->paymentMethods(),
+        ]);
     }
 
     public function list(): JsonResponse
@@ -22,10 +33,12 @@ class ProductController extends Controller
             return strcmp($a['datetime_submitted'], $b['datetime_submitted']);
         });
 
-        $products = array_map(static function (array $product): array {
+        $products = array_map(function (array $product): array {
             $quantity = (int) $product['quantity_in_stock'];
             $price = (float) $product['price_per_item'];
 
+            $product['category'] = $product['category'] ?? 'Other';
+            $product['payment_method'] = $product['payment_method'] ?? 'Cash';
             $product['total_value_number'] = round($quantity * $price, 2);
 
             return $product;
@@ -41,12 +54,14 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'product_name' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'in:' . implode(',', $this->categories())],
             'quantity_in_stock' => ['required', 'integer', 'min:0'],
             'price_per_item' => ['required', 'numeric', 'min:0'],
+            'payment_method' => ['required', 'string', 'in:' . implode(',', $this->paymentMethods())],
         ]);
 
         $products = $this->readProducts();
@@ -54,24 +69,34 @@ class ProductController extends Controller
         $products[] = [
             'id' => (string) Str::uuid(),
             'product_name' => $validated['product_name'],
+            'category' => $validated['category'],
             'quantity_in_stock' => (int) $validated['quantity_in_stock'],
             'price_per_item' => round((float) $validated['price_per_item'], 2),
+            'payment_method' => $validated['payment_method'],
             'datetime_submitted' => now()->toDateTimeString(),
         ];
 
         $this->writeProducts($products);
 
-        return response()->json([
-            'message' => 'Product saved successfully.',
-        ], 201);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Product saved successfully.',
+            ], 201);
+        }
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product saved successfully.');
     }
 
     public function update(Request $request, string $id): JsonResponse
     {
         $validated = $request->validate([
             'product_name' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'in:' . implode(',', $this->categories())],
             'quantity_in_stock' => ['required', 'integer', 'min:0'],
             'price_per_item' => ['required', 'numeric', 'min:0'],
+            'payment_method' => ['required', 'string', 'in:' . implode(',', $this->paymentMethods())],
         ]);
 
         $products = $this->readProducts();
@@ -83,8 +108,10 @@ class ProductController extends Controller
             }
 
             $product['product_name'] = $validated['product_name'];
+            $product['category'] = $validated['category'];
             $product['quantity_in_stock'] = (int) $validated['quantity_in_stock'];
             $product['price_per_item'] = round((float) $validated['price_per_item'], 2);
+            $product['payment_method'] = $validated['payment_method'];
             $found = true;
             break;
         }
@@ -100,6 +127,28 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product updated successfully.',
+        ]);
+    }
+
+    public function destroy(string $id): JsonResponse
+    {
+        $products = $this->readProducts();
+        $initialCount = count($products);
+
+        $products = array_values(array_filter($products, static function (array $product) use ($id): bool {
+            return ($product['id'] ?? null) !== $id;
+        }));
+
+        if (count($products) === $initialCount) {
+            return response()->json([
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        $this->writeProducts($products);
+
+        return response()->json([
+            'message' => 'Product deleted successfully.',
         ]);
     }
 
@@ -142,5 +191,21 @@ class ProductController extends Controller
         }
 
         File::put($path, json_encode($products, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), true);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function categories(): array
+    {
+        return ['Electronics', 'Grocery', 'Fashion', 'Home', 'Office', 'Other'];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function paymentMethods(): array
+    {
+        return ['UPI', 'Cash', 'Card'];
     }
 }

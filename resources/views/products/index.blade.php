@@ -13,15 +13,14 @@
     <style>
         :root {
             --ink: #19253f;
-            --muted: #687089;
-            --line: #d9e2f2;
-            --surface: #ffffff;
+            --muted: #67708a;
+            --line: #d7e1f0;
             --primary: #1f6feb;
-            --primary-soft: rgba(31, 111, 235, 0.16);
             --teal: #00a8a8;
-            --amber: #e7a239;
             --rose: #ef5c7d;
+            --amber: #e7a239;
             --mint: #1db774;
+            --focus: rgba(31, 111, 235, 0.16);
         }
 
         body {
@@ -30,27 +29,21 @@
             font-family: "Outfit", sans-serif;
             color: var(--ink);
             background:
-                radial-gradient(42rem 25rem at 4% 0%, rgba(31, 111, 235, 0.18), transparent),
-                radial-gradient(25rem 20rem at 98% 22%, rgba(29, 183, 116, 0.16), transparent),
-                linear-gradient(165deg, #eff4ff 0%, #f3f9ff 42%, #eef8f8 100%);
-        }
-
-        .page-wrap {
-            position: relative;
-            z-index: 1;
-            animation: enter 0.7s ease-out both;
+                radial-gradient(40rem 25rem at 0% 0%, rgba(31, 111, 235, 0.18), transparent),
+                radial-gradient(24rem 18rem at 96% 24%, rgba(0, 168, 168, 0.14), transparent),
+                linear-gradient(165deg, #eff4ff 0%, #f3f9ff 45%, #eef8f8 100%);
         }
 
         .title {
             font-family: "Fraunces", serif;
             font-size: clamp(2rem, 3vw, 2.8rem);
             letter-spacing: -0.02em;
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.4rem;
         }
 
         .subtitle {
             color: var(--muted);
-            max-width: 52rem;
+            max-width: 55rem;
         }
 
         .panel {
@@ -90,9 +83,9 @@
         }
 
         .stat-total .stat-value { color: var(--primary); }
-        .stat-low .stat-value { color: var(--rose); }
-        .stat-medium .stat-value { color: var(--amber); }
-        .stat-high .stat-value { color: var(--mint); }
+        .stat-electronics .stat-value { color: var(--teal); }
+        .stat-grocery .stat-value { color: var(--amber); }
+        .stat-fashion .stat-value { color: var(--rose); }
 
         .toolbar {
             display: grid;
@@ -108,9 +101,10 @@
 
         .toolbar .form-select:focus,
         .toolbar .form-control:focus,
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 0.25rem var(--primary-soft);
+            box-shadow: 0 0 0 0.25rem var(--focus);
         }
 
         .btn-soft {
@@ -121,23 +115,13 @@
             font-weight: 600;
         }
 
-        .btn-soft:hover {
-            border-color: #b8c7e4;
-            background: #f7faff;
-        }
-
         .btn-main {
             border: none;
             border-radius: 0.75rem;
             font-weight: 700;
+            color: #fff;
             background: linear-gradient(135deg, var(--primary), var(--teal));
             box-shadow: 0 0.65rem 1.2rem rgba(31, 111, 235, 0.24);
-        }
-
-        .form-panel {
-            border: 1px solid var(--line);
-            border-radius: 0.95rem;
-            background: linear-gradient(180deg, #ffffff, #f8fbff);
         }
 
         .table-wrap {
@@ -148,12 +132,13 @@
         }
 
         .table {
-            margin: 0;
+            margin-bottom: 0;
         }
 
-        .table th,
-        .table td {
+        .table td,
+        .table th {
             vertical-align: middle;
+            white-space: nowrap;
         }
 
         .table thead th {
@@ -161,7 +146,6 @@
             border-bottom: 1px solid var(--line);
             color: #22314f;
             font-weight: 700;
-            white-space: nowrap;
         }
 
         .table tfoot tr {
@@ -193,21 +177,7 @@
 
         .money {
             text-align: right;
-            white-space: nowrap;
             font-variant-numeric: tabular-nums;
-        }
-
-        .row-actions {
-            min-width: 88px;
-        }
-
-        .edit-actions {
-            display: flex;
-            gap: 0.35rem;
-        }
-
-        .input-sm {
-            min-width: 84px;
         }
 
         .table-empty {
@@ -216,15 +186,13 @@
             padding: 1.6rem;
         }
 
-        @keyframes enter {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .edit-actions {
+            display: flex;
+            gap: 0.35rem;
+        }
+
+        .input-sm {
+            min-width: 96px;
         }
 
         @media (max-width: 992px) {
@@ -239,12 +207,12 @@
     </style>
 </head>
 <body>
-<div class="container py-4 py-md-5 page-wrap">
+<div class="container py-4 py-md-5">
     <div class="row justify-content-center">
         <div class="col-xl-11">
             <div class="mb-3 mb-md-4">
                 <h1 class="title">Inventory Dashboard</h1>
-                <p class="subtitle mb-0">Overview your products, filter by duration, search quickly, export current results, and manage each row from the action menu.</p>
+                <p class="subtitle mb-0">Category based overview with filters, sortable table, detail modal, and action menu for edit and view.</p>
             </div>
 
             <div class="stats-grid mb-3 mb-md-4">
@@ -252,22 +220,29 @@
                     <div class="stat-label">Total Products</div>
                     <div class="stat-value" id="stat-total-products">0</div>
                 </div>
-                <div class="stat-card stat-low">
-                    <div class="stat-label">Low Stock (0-10)</div>
-                    <div class="stat-value" id="stat-low-products">0</div>
+                <div class="stat-card stat-electronics">
+                    <div class="stat-label">Electronics</div>
+                    <div class="stat-value" id="stat-electronics-products">0</div>
                 </div>
-                <div class="stat-card stat-medium">
-                    <div class="stat-label">Medium Stock (11-50)</div>
-                    <div class="stat-value" id="stat-medium-products">0</div>
+                <div class="stat-card stat-grocery">
+                    <div class="stat-label">Grocery</div>
+                    <div class="stat-value" id="stat-grocery-products">0</div>
                 </div>
-                <div class="stat-card stat-high">
-                    <div class="stat-label">High Stock (51+)</div>
-                    <div class="stat-value" id="stat-high-products">0</div>
+                <div class="stat-card stat-fashion">
+                    <div class="stat-label">Fashion</div>
+                    <div class="stat-value" id="stat-fashion-products">0</div>
                 </div>
             </div>
 
             <div class="panel p-3 p-md-4">
-                <div id="alert-area" class="mb-3"></div>
+                <div id="alert-area" class="mb-3">
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                </div>
 
                 <div class="toolbar mb-3">
                     <select id="duration-filter" class="form-select" aria-label="Duration filter">
@@ -277,37 +252,15 @@
                         <option value="90">Last 90 Days</option>
                     </select>
 
-                    <input id="search-input" type="search" class="form-control" placeholder="Search by id, product, quantity, price or datetime">
+                    <input id="search-input" type="search" class="form-control" placeholder="Search by id, name, category, payment or datetime">
 
                     <button id="export-btn" type="button" class="btn btn-soft">
                         <i class="bi bi-download me-1"></i> Export
                     </button>
 
-                    <button id="toggle-form-btn" type="button" class="btn btn-main text-white" data-bs-toggle="collapse" data-bs-target="#add-product-panel" aria-expanded="false" aria-controls="add-product-panel">
+                    <a href="{{ route('products.create') }}" class="btn btn-main">
                         <i class="bi bi-plus-lg me-1"></i> Add Product
-                    </button>
-                </div>
-
-                <div id="add-product-panel" class="collapse mb-3">
-                    <div class="form-panel p-3">
-                        <form id="product-form" class="row g-3 align-items-end">
-                            <div class="col-md-5">
-                                <label for="product_name" class="form-label fw-semibold">Product name</label>
-                                <input type="text" class="form-control" id="product_name" name="product_name" required maxlength="255" placeholder="Example: Wireless Keyboard">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="quantity_in_stock" class="form-label fw-semibold">Quantity in stock</label>
-                                <input type="number" class="form-control" id="quantity_in_stock" name="quantity_in_stock" min="0" step="1" required placeholder="0">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="price_per_item" class="form-label fw-semibold">Price per item</label>
-                                <input type="number" class="form-control" id="price_per_item" name="price_per_item" min="0" step="0.01" required placeholder="0.00">
-                            </div>
-                            <div class="col-md-1 d-grid">
-                                <button type="submit" class="btn btn-main text-white">Save</button>
-                            </div>
-                        </form>
-                    </div>
+                    </a>
                 </div>
 
                 <div class="table-wrap">
@@ -315,31 +268,21 @@
                         <table class="table table-hover align-middle" id="products-table">
                             <thead>
                             <tr>
-                                <th>
-                                    <button type="button" class="sort-btn" data-sort="id">ID <i class="bi bi-arrow-down-up"></i></button>
-                                </th>
-                                <th>
-                                    <button type="button" class="sort-btn" data-sort="product_name">Product name <i class="bi bi-arrow-down-up"></i></button>
-                                </th>
-                                <th>
-                                    <button type="button" class="sort-btn" data-sort="quantity_in_stock">Quantity in stock <i class="bi bi-arrow-down-up"></i></button>
-                                </th>
-                                <th>
-                                    <button type="button" class="sort-btn" data-sort="price_per_item">Price per item <i class="bi bi-arrow-down-up"></i></button>
-                                </th>
-                                <th>
-                                    <button type="button" class="sort-btn" data-sort="datetime_submitted">Datetime submitted <i class="bi bi-arrow-down-up"></i></button>
-                                </th>
-                                <th class="text-end">
-                                    <button type="button" class="sort-btn" data-sort="total_value_number">Total value number <i class="bi bi-arrow-down-up"></i></button>
-                                </th>
+                                <th><button type="button" class="sort-btn" data-sort="id">ID <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th><button type="button" class="sort-btn" data-sort="product_name">Product name <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th><button type="button" class="sort-btn" data-sort="category">Category <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th><button type="button" class="sort-btn" data-sort="quantity_in_stock">Quantity <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th><button type="button" class="sort-btn" data-sort="price_per_item">Price <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th><button type="button" class="sort-btn" data-sort="payment_method">Payment <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th><button type="button" class="sort-btn" data-sort="datetime_submitted">Datetime <i class="bi bi-arrow-down-up"></i></button></th>
+                                <th class="text-end"><button type="button" class="sort-btn" data-sort="total_value_number">Total value <i class="bi bi-arrow-down-up"></i></button></th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody id="products-body"></tbody>
                             <tfoot>
                             <tr class="fw-semibold">
-                                <td colspan="5">Sum total</td>
+                                <td colspan="7">Sum total</td>
                                 <td id="grand-total" class="money">0.00</td>
                                 <td></td>
                             </tr>
@@ -363,19 +306,18 @@
                 <dl class="row mb-0">
                     <dt class="col-5">ID</dt>
                     <dd class="col-7" id="detail-id"></dd>
-
                     <dt class="col-5">Product name</dt>
                     <dd class="col-7" id="detail-name"></dd>
-
+                    <dt class="col-5">Category</dt>
+                    <dd class="col-7" id="detail-category"></dd>
                     <dt class="col-5">Quantity in stock</dt>
                     <dd class="col-7" id="detail-qty"></dd>
-
                     <dt class="col-5">Price per item</dt>
                     <dd class="col-7" id="detail-price"></dd>
-
+                    <dt class="col-5">Payment method</dt>
+                    <dd class="col-7" id="detail-payment"></dd>
                     <dt class="col-5">Datetime submitted</dt>
                     <dd class="col-7" id="detail-datetime"></dd>
-
                     <dt class="col-5">Total value number</dt>
                     <dd class="col-7" id="detail-total"></dd>
                 </dl>
@@ -384,33 +326,43 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const categories = @json($categories);
+    const paymentMethods = @json($paymentMethods);
 
-    const form = document.getElementById('product-form');
     const bodyEl = document.getElementById('products-body');
     const totalEl = document.getElementById('grand-total');
     const alertArea = document.getElementById('alert-area');
     const durationFilterEl = document.getElementById('duration-filter');
     const searchInputEl = document.getElementById('search-input');
     const exportBtn = document.getElementById('export-btn');
-    const addPanelEl = document.getElementById('add-product-panel');
-    const productNameInput = document.getElementById('product_name');
 
     const totalProductsEl = document.getElementById('stat-total-products');
-    const lowProductsEl = document.getElementById('stat-low-products');
-    const mediumProductsEl = document.getElementById('stat-medium-products');
-    const highProductsEl = document.getElementById('stat-high-products');
+    const electronicsProductsEl = document.getElementById('stat-electronics-products');
+    const groceryProductsEl = document.getElementById('stat-grocery-products');
+    const fashionProductsEl = document.getElementById('stat-fashion-products');
 
-    const detailsModalEl = document.getElementById('productDetailsModal');
+    const detailsModalElement = document.getElementById('productDetailsModal');
+    let detailsModal = null;
     const detailIdEl = document.getElementById('detail-id');
     const detailNameEl = document.getElementById('detail-name');
+    const detailCategoryEl = document.getElementById('detail-category');
     const detailQtyEl = document.getElementById('detail-qty');
     const detailPriceEl = document.getElementById('detail-price');
+    const detailPaymentEl = document.getElementById('detail-payment');
     const detailDatetimeEl = document.getElementById('detail-datetime');
     const detailTotalEl = document.getElementById('detail-total');
 
-    const detailsModal = new bootstrap.Modal(detailsModalEl);
+    function getDetailsModal() {
+        if (!detailsModal) {
+            detailsModal = new bootstrap.Modal(detailsModalElement);
+        }
+
+        return detailsModal;
+    }
+
     const state = {
         products: [],
         filteredProducts: [],
@@ -453,14 +405,14 @@
 
     function updateSummaryCards(products) {
         const total = products.length;
-        const low = products.filter((item) => Number(item.quantity_in_stock) <= 10).length;
-        const medium = products.filter((item) => Number(item.quantity_in_stock) >= 11 && Number(item.quantity_in_stock) <= 50).length;
-        const high = products.filter((item) => Number(item.quantity_in_stock) >= 51).length;
+        const electronics = products.filter((item) => String(item.category).toLowerCase() === 'electronics').length;
+        const grocery = products.filter((item) => String(item.category).toLowerCase() === 'grocery').length;
+        const fashion = products.filter((item) => String(item.category).toLowerCase() === 'fashion').length;
 
         totalProductsEl.textContent = String(total);
-        lowProductsEl.textContent = String(low);
-        mediumProductsEl.textContent = String(medium);
-        highProductsEl.textContent = String(high);
+        electronicsProductsEl.textContent = String(electronics);
+        groceryProductsEl.textContent = String(grocery);
+        fashionProductsEl.textContent = String(fashion);
     }
 
     function compareProducts(a, b) {
@@ -470,7 +422,7 @@
         let left = a[key];
         let right = b[key];
 
-        if (key === 'quantity_in_stock' || key === 'price_per_item' || key === 'total_value_number') {
+        if (['quantity_in_stock', 'price_per_item', 'total_value_number'].includes(key)) {
             left = Number(left);
             right = Number(right);
         } else if (key === 'datetime_submitted') {
@@ -513,8 +465,10 @@
                 const haystack = [
                     item.id,
                     item.product_name,
+                    item.category,
                     item.quantity_in_stock,
                     item.price_per_item,
+                    item.payment_method,
                     item.datetime_submitted,
                     item.total_value_number
                 ]
@@ -529,9 +483,17 @@
         return rows;
     }
 
+    function buildSelectOptions(options, selected) {
+        return options.map((option) => {
+            const safeOption = escapeHtml(option);
+            const isSelected = String(option) === String(selected) ? 'selected' : '';
+            return `<option value="${safeOption}" ${isSelected}>${safeOption}</option>`;
+        }).join('');
+    }
+
     function renderTable(products) {
         if (!products.length) {
-            bodyEl.innerHTML = '<tr><td colspan="7" class="table-empty">No matching records found.</td></tr>';
+            bodyEl.innerHTML = '<tr><td colspan="9" class="table-empty">No matching records found.</td></tr>';
             totalEl.textContent = money(0);
             return;
         }
@@ -539,6 +501,8 @@
         bodyEl.innerHTML = products.map((item) => {
             const safeId = escapeHtml(item.id);
             const safeName = escapeHtml(item.product_name);
+            const safeCategory = escapeHtml(item.category || 'Other');
+            const safePayment = escapeHtml(item.payment_method || 'Cash');
             const safeDate = escapeHtml(item.datetime_submitted);
             const qty = Number(item.quantity_in_stock);
             const price = Number(item.price_per_item);
@@ -546,12 +510,14 @@
 
             return `
                 <tr data-id="${safeId}">
-                    <td>
-                        <button type="button" class="id-link detail-link">${escapeHtml(shortId(item.id))}</button>
-                    </td>
+                    <td><button type="button" class="id-link detail-link">${escapeHtml(shortId(item.id))}</button></td>
                     <td>
                         <span class="view-field" data-field="product_name">${safeName}</span>
                         <input class="form-control form-control-sm edit-field d-none" name="product_name" value="${safeName}">
+                    </td>
+                    <td>
+                        <span class="view-field" data-field="category">${safeCategory}</span>
+                        <select class="form-select form-select-sm edit-field d-none input-sm" name="category">${buildSelectOptions(categories, item.category || 'Other')}</select>
                     </td>
                     <td>
                         <span class="view-field" data-field="quantity_in_stock">${qty}</span>
@@ -561,10 +527,14 @@
                         <span class="view-field" data-field="price_per_item">${money(price)}</span>
                         <input class="form-control form-control-sm edit-field d-none input-sm" type="number" name="price_per_item" min="0" step="0.01" value="${money(price)}">
                     </td>
+                    <td>
+                        <span class="view-field" data-field="payment_method">${safePayment}</span>
+                        <select class="form-select form-select-sm edit-field d-none input-sm" name="payment_method">${buildSelectOptions(paymentMethods, item.payment_method || 'Cash')}</select>
+                    </td>
                     <td>${safeDate}</td>
                     <td class="money">${money(total)}</td>
                     <td>
-                        <div class="row-actions view-actions">
+                        <div class="view-actions">
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-soft" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-three-dots-vertical"></i>
@@ -572,6 +542,8 @@
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><button class="dropdown-item view-action" type="button">View</button></li>
                                     <li><button class="dropdown-item edit-action" type="button">Edit</button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><button class="dropdown-item text-danger delete-action" type="button">Delete</button></li>
                                 </ul>
                             </div>
                         </div>
@@ -581,8 +553,8 @@
                         </div>
                     </td>
                 </tr>
-            `;
-        }).join('');
+             `;
+         }).join('');
 
         const grandTotal = products.reduce((carry, item) => carry + Number(item.total_value_number || 0), 0);
         totalEl.textContent = money(grandTotal);
@@ -602,12 +574,13 @@
 
         detailIdEl.textContent = item.id;
         detailNameEl.textContent = item.product_name;
+        detailCategoryEl.textContent = item.category || 'Other';
         detailQtyEl.textContent = String(item.quantity_in_stock);
         detailPriceEl.textContent = money(item.price_per_item);
+        detailPaymentEl.textContent = item.payment_method || 'Cash';
         detailDatetimeEl.textContent = item.datetime_submitted;
         detailTotalEl.textContent = money(item.total_value_number);
-
-        detailsModal.show();
+        getDetailsModal().show();
     }
 
     function toggleEditMode(row, editing) {
@@ -631,33 +604,6 @@
         const payload = await response.json();
         state.products = payload.products || [];
         applyFiltersAndRender();
-    }
-
-    async function submitForm(event) {
-        event.preventDefault();
-
-        const data = new FormData(form);
-        const payload = Object.fromEntries(data.entries());
-
-        const response = await fetch('/products', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const failed = await response.json();
-            throw new Error(failed.message || 'Validation failed.');
-        }
-
-        form.reset();
-        bootstrap.Collapse.getOrCreateInstance(addPanelEl).hide();
-        showAlert('Product saved successfully.', 'success');
-        await fetchProducts();
     }
 
     async function saveRow(row) {
@@ -687,6 +633,24 @@
         await fetchProducts();
     }
 
+    async function deleteRow(id) {
+        const response = await fetch(`/products/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            }
+        });
+
+        if (!response.ok) {
+            const failed = await response.json();
+            throw new Error(failed.message || 'Delete failed.');
+        }
+
+        showAlert('Product deleted successfully.', 'success');
+        await fetchProducts();
+    }
+
     function exportCsv() {
         const rows = state.filteredProducts;
         if (!rows.length) {
@@ -694,7 +658,7 @@
             return;
         }
 
-        const headers = ['id', 'product_name', 'quantity_in_stock', 'price_per_item', 'datetime_submitted', 'total_value_number'];
+        const headers = ['id', 'product_name', 'category', 'quantity_in_stock', 'price_per_item', 'payment_method', 'datetime_submitted', 'total_value_number'];
         const lines = [headers.join(',')];
 
         rows.forEach((item) => {
@@ -718,14 +682,6 @@
         URL.revokeObjectURL(url);
     }
 
-    form.addEventListener('submit', async (event) => {
-        try {
-            await submitForm(event);
-        } catch (error) {
-            showAlert(error.message, 'danger');
-        }
-    });
-
     durationFilterEl.addEventListener('change', () => {
         state.duration = durationFilterEl.value;
         applyFiltersAndRender();
@@ -737,10 +693,6 @@
     });
 
     exportBtn.addEventListener('click', exportCsv);
-
-    addPanelEl.addEventListener('shown.bs.collapse', () => {
-        productNameInput.focus();
-    });
 
     document.querySelectorAll('.sort-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -774,6 +726,21 @@
             return;
         }
 
+        if (event.target.closest('.delete-action')) {
+            const shouldDelete = window.confirm('Are you sure you want to delete this product?');
+            if (!shouldDelete) {
+                return;
+            }
+
+            try {
+                await deleteRow(id);
+            } catch (error) {
+                showAlert(error.message, 'danger');
+            }
+
+            return;
+        }
+
         if (event.target.closest('.cancel-btn')) {
             await fetchProducts();
             return;
@@ -790,6 +757,5 @@
 
     fetchProducts().catch((error) => showAlert(error.message, 'danger'));
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
